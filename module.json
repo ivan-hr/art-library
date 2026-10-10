@@ -1,0 +1,29 @@
+{
+  "id": "art-library",
+  "title": "Art Library",
+  "description": "Keeps a GM-only library of image, video and Pinterest links and opens them in a resizable window for one player or the whole table.",
+  "version": "0.1.0",
+  "authors": [
+    {
+      "name": "ivan-hr",
+      "discord": "user41635"
+    }
+  ],
+  "license": "LICENSE",
+  "compatibility": {
+    "minimum": "13",
+    "verified": "14"
+  },
+  "esmodules": ["scripts/main.js"],
+  "styles": ["styles/art-library.css"],
+  "languages": [
+    { "lang": "de", "name": "Deutsch", "path": "lang/de.json" },
+    { "lang": "en", "name": "English", "path": "lang/en.json" }
+  ],
+  "socket": true,
+  "url": "https://github.com/ivan-hr/art-library",
+  "manifest": "https://raw.githubusercontent.com/ivan-hr/art-library/main/module.json",
+  "download": "https://github.com/ivan-hr/art-library/releases/latest/download/module.zip",
+  "bugs": "https://github.com/ivan-hr/art-library/issues",
+  "readme": "https://github.com/ivan-hr/art-library/blob/main/README.md"
+}

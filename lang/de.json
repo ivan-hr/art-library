@@ -1,0 +1,54 @@
+{
+  "ARTLIBRARY": {
+    "Library": {
+      "Title": "Art Library",
+      "Add": "Hinzufügen",
+      "Save": "Speichern",
+      "Cancel": "Abbrechen",
+      "Empty": "Noch keine Bilder. Füge einen Link ein.",
+      "Name": "Name",
+      "NameHint": "Von Pinterest übernommen, kannst du hier ändern.",
+      "Url": "Link",
+      "UrlHint": "Link einfügen reicht. Titel und Vorschau werden automatisch erzeugt."
+    },
+    "Tab": {
+      "Links": "Links",
+      "World": "Welt"
+    },
+    "World": {
+      "Empty": "Keine Bilder in diesem Ordner."
+    },
+    "Source": {
+      "Local": "Lokal gespeichert",
+      "Remote": "Direkt von der Quelle"
+    },
+    "Open": "Öffnen",
+    "ShareAll": "Mit allen Spielern teilen",
+    "CloseAll": "Bei allen Spielern schließen",
+    "Edit": "Bearbeiten",
+    "Delete": "Löschen",
+    "DeleteConfirm": "„{name}“ aus der Bibliothek entfernen?",
+    "Type": {
+      "image": "Bild",
+      "video": "Video",
+      "pin": "Pinterest",
+      "youtube": "YouTube",
+      "vimeo": "Vimeo"
+    },
+    "GMOnly": "Nur der Spielleiter kann die Bibliothek ändern oder Medien für andere öffnen.",
+    "NotFound": "Medium \"{ref}\" wurde nicht gefunden.",
+    "Shared": "„{name}“ für alle Spieler geöffnet.",
+    "Saved": "In der Bibliothek gespeichert.",
+    "NeedUrl": "Bitte einen Link eintragen.",
+    "Settings": {
+      "Width": {
+        "Name": "Standardbreite",
+        "Hint": "Breite des Bildfensters in Pixeln beim Öffnen."
+      },
+      "Height": {
+        "Name": "Standardhöhe",
+        "Hint": "Höhe des Bildfensters in Pixeln beim Öffnen."
+      }
+    }
+  }
+}

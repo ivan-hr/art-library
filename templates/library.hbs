@@ -1,0 +1,113 @@
+<div class="al-body">
+  <nav class="al-tabs">
+    <button type="button" data-action="setTab" data-tab="links" class="{{#if tabLinks}}active{{/if}}">
+      <i class="fa-solid fa-link"></i> {{localize "ARTLIBRARY.Tab.Links"}}
+    </button>
+    <button type="button" data-action="setTab" data-tab="world" class="{{#if tabWorld}}active{{/if}}">
+      <i class="fa-solid fa-folder-open"></i> {{localize "ARTLIBRARY.Tab.World"}}
+    </button>
+  </nav>
+
+  {{#if tabLinks}}
+  <form class="al-form" autocomplete="off">
+    <label class="al-span">
+      <span>{{localize "ARTLIBRARY.Library.Url"}}</span>
+      <input type="url" name="url" value="{{form.url}}" required placeholder="https://">
+      <small>{{localize "ARTLIBRARY.Library.UrlHint"}}</small>
+    </label>
+    {{#if form.id}}
+    <label class="al-span">
+      <span>{{localize "ARTLIBRARY.Library.Name"}}</span>
+      <input type="text" name="name" value="{{form.name}}" placeholder="">
+      <small>{{localize "ARTLIBRARY.Library.NameHint"}}</small>
+    </label>
+    {{/if}}
+    <div class="al-form-actions">
+      {{#if form.id}}
+      <button type="button" data-action="save"><i class="fa-solid fa-check"></i> {{localize "ARTLIBRARY.Library.Save"}}</button>
+      <button type="button" data-action="cancel"><i class="fa-solid fa-xmark"></i> {{localize "ARTLIBRARY.Library.Cancel"}}</button>
+      {{else}}
+      <button type="button" data-action="add"><i class="fa-solid fa-plus"></i> {{localize "ARTLIBRARY.Library.Add"}}</button>
+      {{/if}}
+    </div>
+  </form>
+
+  {{#unless items.length}}
+  <p class="al-empty">{{localize "ARTLIBRARY.Library.Empty"}}</p>
+  {{else}}
+  <ul class="al-grid">
+    {{#each items}}
+    <li class="al-card" data-id="{{id}}">
+      <button type="button" class="al-thumb" data-action="open" data-id="{{id}}" title="{{localize "ARTLIBRARY.Open"}}">
+        {{#if preview}}
+        <img src="{{preview}}" alt="" loading="lazy">
+        {{else}}
+        <i class="{{icon}}"></i>
+        {{/if}}
+        <span class="al-source {{#if saved}}local{{else}}remote{{/if}}" data-tooltip="{{sourceLabel}}">
+          <i class="{{sourceIcon}}"></i>
+        </span>
+      </button>
+      <div class="al-meta">
+        <strong>{{name}}</strong>
+        <span class="al-type">{{typeLabel}}</span>
+      </div>
+      <div class="al-card-actions">
+        <button type="button" data-action="open" data-id="{{id}}" data-tooltip="{{localize "ARTLIBRARY.Open"}}"><i class="fa-solid fa-up-right-from-square"></i></button>
+        <button type="button" data-action="share" data-id="{{id}}" data-tooltip="{{localize "ARTLIBRARY.ShareAll"}}"><i class="fa-solid fa-users"></i></button>
+        <button type="button" data-action="edit" data-id="{{id}}" data-tooltip="{{localize "ARTLIBRARY.Edit"}}"><i class="fa-solid fa-pen"></i></button>
+        <button type="button" data-action="remove" data-id="{{id}}" data-tooltip="{{localize "ARTLIBRARY.Delete"}}"><i class="fa-solid fa-trash"></i></button>
+      </div>
+    </li>
+    {{/each}}
+  </ul>
+  {{/unless}}
+  {{/if}}
+
+  {{#if tabWorld}}
+  <nav class="al-crumbs">
+    {{#each crumbs}}
+    {{#unless @first}}<span class="al-crumb-sep">/</span>{{/unless}}
+    <button type="button" data-action="openFolder" data-path="{{path}}" {{#if current}}disabled{{/if}}>{{label}}</button>
+    {{/each}}
+  </nav>
+
+  {{#if folders.length}}
+  <ul class="al-folders">
+    {{#each folders}}
+    <li>
+      <button type="button" data-action="openFolder" data-path="{{path}}">
+        <i class="fa-solid fa-folder"></i>
+        <span>{{name}}</span>
+      </button>
+    </li>
+    {{/each}}
+  </ul>
+  {{/if}}
+
+  {{#unless files.length}}
+  <p class="al-empty">{{localize "ARTLIBRARY.World.Empty"}}</p>
+  {{else}}
+  <ul class="al-grid">
+    {{#each files}}
+    <li class="al-card">
+      <button type="button" class="al-thumb" data-action="openFile" data-path="{{path}}" title="{{localize "ARTLIBRARY.Open"}}">
+        <img src="{{preview}}" alt="" loading="lazy">
+        <span class="al-source {{#if saved}}local{{else}}remote{{/if}}" data-tooltip="{{sourceLabel}}">
+          <i class="{{sourceIcon}}"></i>
+        </span>
+      </button>
+      <div class="al-meta">
+        <strong>{{name}}</strong>
+        <span class="al-type">{{localize "ARTLIBRARY.Type.image"}}</span>
+      </div>
+      <div class="al-card-actions">
+        <button type="button" data-action="openFile" data-path="{{path}}" data-tooltip="{{localize "ARTLIBRARY.Open"}}"><i class="fa-solid fa-up-right-from-square"></i></button>
+        <button type="button" data-action="shareFile" data-path="{{path}}" data-tooltip="{{localize "ARTLIBRARY.ShareAll"}}"><i class="fa-solid fa-users"></i></button>
+      </div>
+    </li>
+    {{/each}}
+  </ul>
+  {{/unless}}
+  {{/if}}
+</div>

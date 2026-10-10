@@ -1,0 +1,54 @@
+{
+  "ARTLIBRARY": {
+    "Library": {
+      "Title": "Art Library",
+      "Add": "Add",
+      "Save": "Save",
+      "Cancel": "Cancel",
+      "Empty": "No media yet. Paste a link.",
+      "Name": "Name",
+      "NameHint": "Taken from Pinterest. You can change it here.",
+      "Url": "Link",
+      "UrlHint": "Pasting a link is enough. Title and thumbnail are created automatically."
+    },
+    "Tab": {
+      "Links": "Links",
+      "World": "World"
+    },
+    "World": {
+      "Empty": "No images in this folder."
+    },
+    "Source": {
+      "Local": "Saved locally",
+      "Remote": "From the original source"
+    },
+    "Open": "Open",
+    "ShareAll": "Share with all players",
+    "CloseAll": "Close for all players",
+    "Edit": "Edit",
+    "Delete": "Delete",
+    "DeleteConfirm": "Remove \"{name}\" from the library?",
+    "Type": {
+      "image": "Image",
+      "video": "Video",
+      "pin": "Pinterest",
+      "youtube": "YouTube",
+      "vimeo": "Vimeo"
+    },
+    "GMOnly": "Only the GM can change the library or open media for other players.",
+    "NotFound": "Media \"{ref}\" was not found.",
+    "Shared": "Opened \"{name}\" for all players.",
+    "Saved": "Saved to the library.",
+    "NeedUrl": "Please enter a link.",
+    "Settings": {
+      "Width": {
+        "Name": "Default width",
+        "Hint": "Width of the art window in pixels when opened."
+      },
+      "Height": {
+        "Name": "Default height",
+        "Hint": "Height of the art window in pixels when opened."
+      }
+    }
+  }
+}

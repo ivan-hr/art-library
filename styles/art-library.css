@@ -1,0 +1,237 @@
+.application.art-viewer:not(.minimized, .minimizing) {
+  min-width: 320px;
+  min-height: 240px;
+}
+
+.application.art-viewer .window-content,
+.application.art-library .window-content {
+  padding: 0;
+  overflow: hidden;
+}
+
+.application.art-library .window-content {
+  padding: 12px;
+  overflow: auto;
+}
+
+.art-library .al-tabs {
+  display: flex;
+  gap: 6px;
+  margin-bottom: 12px;
+}
+
+.art-library .al-tabs button {
+  flex: 1;
+}
+
+.art-library .al-tabs button.active {
+  background: var(--color-warm-2, #7a5a2d);
+}
+
+.art-library .al-crumbs {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px;
+  margin-bottom: 10px;
+}
+
+.art-library .al-crumbs button {
+  width: auto;
+  height: auto;
+  padding: 2px 6px;
+  border: none;
+  background: transparent;
+}
+
+.art-library .al-crumbs button:disabled {
+  font-weight: 700;
+  opacity: 1;
+}
+
+.art-library .al-crumb-sep {
+  opacity: 0.5;
+}
+
+.art-library .al-folders {
+  list-style: none;
+  margin: 0 0 12px;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.art-library .al-folders button {
+  width: 100%;
+  justify-content: flex-start;
+  gap: 8px;
+}
+
+.art-library .al-form {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 8px 12px;
+  margin-bottom: 16px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--color-border-light-tertiary, #555);
+}
+
+.art-library .al-form label {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.art-library .al-form .al-span {
+  grid-column: 1 / -1;
+}
+
+.art-library .al-form small {
+  opacity: 0.7;
+}
+
+.art-library .al-form-actions {
+  grid-column: 1 / -1;
+  display: flex;
+  gap: 8px;
+}
+
+.art-library .al-empty {
+  opacity: 0.75;
+  text-align: center;
+  padding: 2rem 1rem;
+}
+
+.art-library .al-grid {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: 12px;
+}
+
+.art-library .al-card {
+  display: flex;
+  flex-direction: column;
+  border: 1px solid var(--color-border-light-tertiary, #555);
+  border-radius: 6px;
+  overflow: hidden;
+  background: rgba(0, 0, 0, 0.2);
+}
+
+.art-library .al-thumb {
+  position: relative;
+  display: block;
+  width: 100%;
+  aspect-ratio: 1;
+  padding: 0;
+  border: none;
+  background: #111;
+  color: #aaa;
+  font-size: 2rem;
+  cursor: pointer;
+}
+
+.art-library .al-source {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  width: 1.5rem;
+  height: 1.5rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 4px;
+  font-size: 0.75rem;
+  pointer-events: none;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.45);
+}
+
+.art-library .al-source.local {
+  background: #1f4d2e;
+  color: #b6ecc4;
+}
+
+.art-library .al-source.remote {
+  background: #2a3340;
+  color: #b8c6d6;
+}
+
+.art-library .al-thumb img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border: none;
+}
+
+.art-library .al-meta {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 8px 8px 0;
+}
+
+.art-library .al-meta strong {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.art-library .al-type {
+  font-size: 0.8em;
+  opacity: 0.7;
+}
+
+.art-library .al-card-actions {
+  display: flex;
+  justify-content: space-around;
+  padding: 6px;
+}
+
+.art-library .al-card-actions button {
+  width: 2rem;
+  height: 2rem;
+}
+
+.art-viewer .al-view {
+  width: 100%;
+  height: 100%;
+  background: #000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.art-viewer .al-view img,
+.art-viewer .al-view video {
+  display: block;
+  max-width: 100%;
+  max-height: 100%;
+  width: auto;
+  height: auto;
+  border: none;
+  object-fit: contain;
+}
+
+.art-viewer .al-view iframe {
+  display: block;
+  width: 100%;
+  height: 100%;
+  border: none;
+}
+
+/* Official Pinterest embed includes a title card; clip it and keep only the media. */
+.art-viewer .al-view.al-pin {
+  overflow: hidden;
+}
+
+.art-viewer .al-view.al-pin iframe {
+  height: calc(100% + 180px);
+  pointer-events: none;
+}
+
+.art-viewer .al-view iframe {
+  background: #111;
+}
