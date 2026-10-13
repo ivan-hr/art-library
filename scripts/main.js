@@ -462,7 +462,7 @@ class ArtViewer extends ApplicationV2 {
     classes: ["art-viewer"],
     window: { icon: "fa-solid fa-photo-film", resizable: true },
     actions: {
-      shareAll: ArtViewer.#onShareAll,
+      share: ArtViewer.#onShare,
       closeAll: ArtViewer.#onCloseAll
     }
   };
@@ -471,7 +471,7 @@ class ArtViewer extends ApplicationV2 {
     const controls = super._getHeaderControls();
     if (game.user.isGM) {
       controls.push(
-        { icon: "fa-solid fa-users", label: "ARTLIBRARY.ShareAll", action: "shareAll" },
+        { icon: "fa-solid fa-share-nodes", label: "ARTLIBRARY.Share.Button", action: "share" },
         { icon: "fa-solid fa-users-slash", label: "ARTLIBRARY.CloseAll", action: "closeAll" }
       );
     }
@@ -565,8 +565,8 @@ class ArtViewer extends ApplicationV2 {
     });
   }
 
-  static #onShareAll() {
-    api.openForAll(this.item, { width: this.position.width, height: this.position.height });
+  static #onShare() {
+    shareItem(this.item, { width: this.position.width, height: this.position.height });
   }
 
   static #onCloseAll() {
@@ -723,7 +723,7 @@ class ArtLibrary extends HandlebarsApplicationMixin(ApplicationV2) {
   }
 
   static #onShare(event, target) {
-    api.openForAll(target.dataset.id);
+    shareItem(target.dataset.id);
   }
 
   static #onEdit(event, target) {
@@ -761,7 +761,7 @@ class ArtLibrary extends HandlebarsApplicationMixin(ApplicationV2) {
   }
 
   static #onShareFile(event, target) {
-    api.openForAll(itemFromWorldPath(target.dataset.path));
+    shareItem(itemFromWorldPath(target.dataset.path));
   }
 
   static #onCreateScene(event, target) {
@@ -798,6 +798,125 @@ function emit(payload) {
   game.socket.emit(SOCKET, { ...payload, senderId: game.user.id });
 }
 
+function selectedUserIds(root) {
+  return [...(root?.querySelectorAll(".al-share-user:checked") ?? [])].map(el => el.dataset.userId).filter(Boolean);
+}
+
+function userNames(ids) {
+  return ids.map(id => game.users.get(id)?.name).filter(Boolean).join(", ");
+}
+
+function chatImageSrc(item) {
+  const preview = previewOf(item);
+  if (preview) return preview;
+  if (item?.type === "image" && item.url) return mediaSrc(item.url);
+  return "";
+}
+
+function chatMediaHtml(item, caption = "") {
+  const img = chatImageSrc(item);
+  const name = foundry.utils.escapeHTML(item.name || "");
+  const href = foundry.utils.escapeHTML(item.url || "");
+  const id = foundry.utils.escapeHTML(item.id || "");
+  let html = img
+    ? `<img class="al-chat-image" src="${foundry.utils.escapeHTML(img)}" alt="${name}" data-al-id="${id}" data-al-url="${href}">`
+    : `<p><a href="${href}">${name || href}</a></p>`;
+  if (caption) html += `<p class="al-chat-caption">${foundry.utils.escapeHTML(caption)}</p>`;
+  return html;
+}
+
+async function postToChat(item, { caption = "", userIds = [] } = {}) {
+  const data = { content: chatMediaHtml(item, caption) };
+  if (userIds.length) data.whisper = userIds;
+  await ChatMessage.create(data);
+  ui.notifications.info(userIds.length
+    ? game.i18n.format("ARTLIBRARY.Share.ChatWhispered", { name: item.name, users: userNames(userIds) })
+    : game.i18n.format("ARTLIBRARY.Share.ChatPosted", { name: item.name }));
+}
+
+function shareDialogContent(item) {
+  const preview = previewOf(item);
+  const users = game.users.filter(user => user.id !== game.user.id);
+  const rows = users.map(user => `
+    <label class="al-share-row">
+      <input type="checkbox" class="al-share-user" data-user-id="${user.id}">
+      ${foundry.utils.escapeHTML(user.name)}
+    </label>`).join("");
+  return `
+    <div class="al-share">
+      ${preview ? `<img src="${foundry.utils.escapeHTML(preview)}" alt="">` : ""}
+      <input type="text" name="caption" placeholder="${game.i18n.localize("ARTLIBRARY.Share.Caption")}">
+      <strong>${game.i18n.localize("ARTLIBRARY.Share.To")}</strong>
+      <p class="al-share-hint">${game.i18n.localize("ARTLIBRARY.Share.Hint")}</p>
+      <div class="al-share-users">
+        ${users.length ? `<label class="al-share-row al-share-toggle"><input type="checkbox" class="al-share-all"> ${game.i18n.localize("ARTLIBRARY.Share.SelectAll")}</label>${rows}` : `<p>${game.i18n.localize("ARTLIBRARY.Share.NoUsers")}</p>`}
+      </div>
+    </div>`;
+}
+
+function shareItem(ref, { width, height } = {}) {
+  if (!game.user.isGM) return ui.notifications.warn("ARTLIBRARY.GMOnly", { localize: true });
+  const item = resolveItem(ref);
+  if (!item?.url) {
+    return ui.notifications.warn(game.i18n.format("ARTLIBRARY.NotFound", { ref: String(ref?.url ?? ref) }));
+  }
+  const app = new foundry.applications.api.DialogV2({
+    window: { title: "ARTLIBRARY.Share.Title", icon: "fa-solid fa-share-nodes" },
+    classes: ["al-share-app"],
+    position: { width: 360 },
+    content: shareDialogContent(item),
+    buttons: [
+      {
+        action: "windowAll",
+        label: "ARTLIBRARY.Share.WindowAll",
+        icon: "fa-solid fa-users",
+        callback: () => {
+          api.openForAll(item, { width, height });
+          return true;
+        }
+      },
+      {
+        action: "windowSelected",
+        label: "ARTLIBRARY.Share.WindowSelected",
+        icon: "fa-solid fa-user-check",
+        callback: (_event, button) => {
+          const ids = selectedUserIds(button.form);
+          if (!ids.length) {
+            ui.notifications.warn("ARTLIBRARY.Share.NeedUsers", { localize: true });
+            return false;
+          }
+          api.open(item, { userIds: ids, width, height });
+          ui.notifications.info(game.i18n.format("ARTLIBRARY.SharedWith", {
+            name: item.name,
+            users: userNames(ids)
+          }));
+          return true;
+        }
+      },
+      {
+        action: "chat",
+        label: "ARTLIBRARY.Share.Chat",
+        icon: "fa-solid fa-comment",
+        callback: async (_event, button) => {
+          const caption = button.form.querySelector('[name="caption"]')?.value?.trim() ?? "";
+          await postToChat(item, { caption, userIds: selectedUserIds(button.form) });
+          return true;
+        }
+      }
+    ]
+  });
+  app.addEventListener("render", () => {
+    const all = app.element.querySelector(".al-share-all");
+    if (!all) return;
+    all.addEventListener("change", () => {
+      app.element.querySelectorAll(".al-share-user").forEach(box => {
+        box.checked = all.checked;
+      });
+    });
+  }, { once: true });
+  return app.render({ force: true });
+}
+
 const api = {
   openLibrary() {
     return ArtLibrary.open();
@@ -832,6 +951,17 @@ const api = {
     emit({ action: "open", item, userIds: null, width, height });
     ui.notifications.info(game.i18n.format("ARTLIBRARY.Shared", { name: item.name }));
     return openLocal(item, { width, height });
+  },
+
+  share(ref, options = {}) {
+    return shareItem(ref, options);
+  },
+
+  postToChat(ref, { caption, userIds } = {}) {
+    if (!game.user.isGM) return ui.notifications.warn("ARTLIBRARY.GMOnly", { localize: true });
+    const item = resolveItem(ref);
+    if (!item?.url) return ui.notifications.warn(game.i18n.format("ARTLIBRARY.NotFound", { ref: String(ref) }));
+    return postToChat(item, { caption, userIds });
   },
 
   closeForAll(ref) {
@@ -913,6 +1043,15 @@ async function migrateLegacyLibrary() {
 Hooks.once("ready", async () => {
   await migrateLegacyLibrary();
   game.socket.on(SOCKET, onSocket);
+  document.addEventListener("click", event => {
+    const img = event.target.closest?.(".al-chat-image");
+    if (!img) return;
+    const item = resolveItem(img.dataset.alId) ?? (img.dataset.alUrl ? resolveItem(img.dataset.alUrl) : null);
+    if (item) api.open(item);
+    else if (img.getAttribute("src")) {
+      new foundry.applications.apps.ImagePopout({ src: img.getAttribute("src") }).render({ force: true });
+    }
+  });
 });
 
 Hooks.on("getSceneControlButtons", controls => {

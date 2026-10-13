@@ -1,8 +1,8 @@
 {
   "id": "art-library",
   "title": "Art Library",
-  "description": "Keeps a GM-only library of image, video and Pinterest links and opens them in a resizable window for one player or the whole table.",
-  "version": "0.1.0",
+  "description": "GM-only library of image, video and Pinterest links. Open a window for yourself, selected players or everyone, post to chat, or create a Foundry scene.",
+  "version": "1.0.1",
   "authors": [
     {
       "name": "ivan-hr",

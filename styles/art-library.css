@@ -36,6 +36,66 @@
   opacity: 0.85;
 }
 
+.al-share {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.al-share img {
+  width: 100%;
+  max-height: 180px;
+  object-fit: contain;
+  background: #111;
+  border-radius: 4px;
+}
+
+.al-share-hint {
+  margin: 0;
+  opacity: 0.8;
+  font-size: 0.85em;
+}
+
+.al-share-users {
+  max-height: 180px;
+  overflow: auto;
+  padding: 6px 8px;
+  border: 1px solid var(--color-border-light-tertiary, #555);
+  border-radius: 4px;
+}
+
+.al-share-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 2px 0;
+  cursor: pointer;
+}
+
+.al-share-toggle {
+  font-weight: 700;
+  margin-bottom: 4px;
+  border-bottom: 1px solid var(--color-border-light-tertiary, #444);
+  padding-bottom: 4px;
+}
+
+.al-share-app .form-footer {
+  flex-wrap: wrap;
+}
+
+.chat-message .al-chat-image {
+  max-width: 100%;
+  cursor: pointer;
+  border: none;
+  border-radius: 4px;
+}
+
+.chat-message .al-chat-caption {
+  text-align: center;
+  font-style: italic;
+  margin-top: 4px;
+}
+
 .art-library .al-tabs {
   display: flex;
   gap: 6px;
