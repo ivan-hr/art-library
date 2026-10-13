@@ -202,6 +202,219 @@ function previewUrl(item) {
   return media.preview || "";
 }
 
+function sceneImageSrc(item) {
+  if (item?.localPath) return item.localPath;
+  const url = item?.url || item?.path || "";
+  if (isWorldPath(url) || isImagePath(url)) return url;
+  if (item?.pinImage) return item.pinImage;
+  const media = classify(url);
+  if (media.type === "image" && media.href) return media.href;
+  return "";
+}
+
+function canCreateScene(item) {
+  const type = item?.type || classify(item?.url || item?.path).type;
+  return ["image", "pin"].includes(type) && Boolean(sceneImageSrc(item) || item?.type === "pin");
+}
+
+function uniqueSceneName(base) {
+  const name = String(base || game.i18n.localize("ARTLIBRARY.Scene.Fallback")).trim() || "Scene";
+  const taken = new Set(game.scenes.map(scene => scene.name));
+  if (!taken.has(name)) return name;
+  let n = 2;
+  while (taken.has(`${name} (${n})`)) n += 1;
+  return `${name} (${n})`;
+}
+
+function naturalSize(src) {
+  return new Promise(resolve => {
+    const img = new Image();
+    img.onload = () => resolve({
+      width: Math.max(1, img.naturalWidth || 4000),
+      height: Math.max(1, img.naturalHeight || 3000)
+    });
+    img.onerror = () => resolve({ width: 4000, height: 3000 });
+    img.src = mediaSrc(src);
+  });
+}
+
+function isRemoteUrl(url) {
+  return /^https?:\/\//i.test(String(url ?? ""));
+}
+
+function isLikelyCorsBlocked(url) {
+  return /(?:^|\/\/)(?:i\.pinimg\.com|pinimg\.com|media\.pinterest\.com|cdnb?\.artstation\.com|wixmp\.com|deviantart\.net|tumblr\.com|fbcdn\.net)\//i
+    .test(String(url ?? ""));
+}
+
+function imageProxyUrl(url) {
+  const stripped = String(url ?? "").replace(/^https?:\/\//i, "");
+  return `https://wsrv.nl/?url=${encodeURIComponent(stripped)}`;
+}
+
+function extensionFrom(src, mime = "") {
+  const fromMime = {
+    "image/jpeg": "jpg",
+    "image/png": "png",
+    "image/webp": "webp",
+    "image/gif": "gif",
+    "image/avif": "avif"
+  }[mime];
+  if (fromMime) return fromMime;
+  const match = String(src).match(/\.(avif|bmp|gif|jpe?g|png|webp)(?:$|\?|#)/i);
+  return (match?.[1] || "jpg").toLowerCase().replace("jpeg", "jpg");
+}
+
+async function ensureWorldArtFolder() {
+  const folder = `${worldRoot()}/art-library`;
+  try {
+    await filePicker().createDirectory("data", folder);
+  } catch { /* exists */ }
+  return folder;
+}
+
+async function blobFromUrl(url) {
+  const res = await fetch(url);
+  if (!res.ok) return null;
+  const blob = await res.blob();
+  return blob.type.startsWith("image/") || blob.size > 0 ? blob : null;
+}
+
+async function uploadImageBlob(blob, name, src) {
+  const folder = await ensureWorldArtFolder();
+  const ext = extensionFrom(src, blob.type);
+  const safe = String(name || "scene").replace(/[^\w.-]+/g, "_").slice(0, 40) || "scene";
+  const file = new File([blob], `${safe}-${foundry.utils.randomID(8)}.${ext}`, {
+    type: blob.type || "image/jpeg"
+  });
+  const uploaded = await filePicker().upload("data", folder, file, {}, { notify: false });
+  return uploaded?.path || (typeof uploaded === "string" ? uploaded : "");
+}
+
+async function promptLocalImage(preview) {
+  const DialogV2 = foundry.applications.api.DialogV2;
+  const safePreview = String(preview ?? "").replace(/"/g, "&quot;");
+  return new Promise(resolve => {
+    let settled = false;
+    let app;
+    const finish = file => {
+      if (settled) return;
+      settled = true;
+      resolve(file || null);
+      app?.close();
+    };
+    app = new DialogV2({
+      window: { title: "ARTLIBRARY.Scene.ImportTitle", icon: "fa-solid fa-file-import" },
+      position: { width: 460 },
+      content: `
+        <div class="al-import">
+          <p>${game.i18n.localize("ARTLIBRARY.Scene.ImportHint")}</p>
+          ${safePreview ? `<img src="${safePreview}" alt="">` : ""}
+          <div class="al-import-drop">${game.i18n.localize("ARTLIBRARY.Scene.ImportDrop")}</div>
+          <input type="file" accept="image/*">
+        </div>`,
+      buttons: [{ action: "cancel", label: "ARTLIBRARY.Library.Cancel", icon: "fa-solid fa-xmark" }]
+    });
+    app.addEventListener("close", () => finish(null), { once: true });
+    app.addEventListener("render", () => {
+      const root = app.element;
+      const take = file => file?.type.startsWith("image/") && finish(file);
+      root.addEventListener("paste", event => {
+        const files = [...(event.clipboardData?.files ?? [])];
+        const fromItems = [...(event.clipboardData?.items ?? [])]
+          .filter(item => item.type.startsWith("image/"))
+          .map(item => item.getAsFile())
+          .filter(Boolean);
+        take(files.find(file => file.type.startsWith("image/")) || fromItems[0]);
+      });
+      root.addEventListener("dragover", event => event.preventDefault());
+      root.addEventListener("drop", event => {
+        event.preventDefault();
+        take(event.dataTransfer?.files?.[0]);
+      });
+      root.querySelector("input[type=file]")?.addEventListener("change", event => take(event.target.files?.[0]));
+    }, { once: true });
+    app.render({ force: true });
+  });
+}
+
+async function importImageForScene(src, name) {
+  if (!isRemoteUrl(src)) return src;
+
+  const tryFetch = async url => {
+    try {
+      const blob = await blobFromUrl(url);
+      if (!blob) return "";
+      return uploadImageBlob(blob, name, src);
+    } catch {
+      return "";
+    }
+  };
+
+  if (!isLikelyCorsBlocked(src)) {
+    const direct = await tryFetch(src);
+    if (direct) return direct;
+  }
+
+  const proxied = await tryFetch(imageProxyUrl(src));
+  if (proxied) return proxied;
+
+  const file = await promptLocalImage(src);
+  if (!file) return "";
+  return uploadImageBlob(file, name, file.name || src);
+}
+
+async function rememberLocalPath(item, path) {
+  if (!path || !item?.id || String(item.id).startsWith("local-")) return;
+  const items = readLibrary();
+  const index = items.findIndex(entry => entry.id === item.id);
+  if (index < 0) return;
+  items[index].localPath = path;
+  await writeLibrary(items);
+}
+
+async function applySceneBackground(scene, path) {
+  const level = scene.initialLevel ?? scene.levels?.contents?.[0];
+  if (level) {
+    await level.update({ "background.src": path });
+    return;
+  }
+  if ("levels" in scene) {
+    const [created] = await scene.createEmbeddedDocuments("Level", [{ background: { src: path } }]);
+    if (created?.id && scene.initialLevel?.id !== created.id) {
+      try { await scene.update({ initialLevel: created.id }); } catch { /* default first level */ }
+    }
+    return;
+  }
+  await scene.update({ "background.src": path });
+}
+
+async function createSceneFromItem(item) {
+  if (!game.user.isGM) return ui.notifications.warn("ARTLIBRARY.GMOnly", { localize: true });
+  const next = { ...item };
+  if (next.type === "pin" && !next.pinImage) {
+    next.pinImage = (await resolvePinMeta(next.url)).image;
+  }
+  const src = sceneImageSrc(next);
+  if (!src) return ui.notifications.warn("ARTLIBRARY.Scene.NeedImage", { localize: true });
+  const path = await importImageForScene(src, next.name);
+  if (!path) return ui.notifications.warn("ARTLIBRARY.Scene.ImportCancel", { localize: true });
+  await rememberLocalPath(next, path);
+  const { width, height } = await naturalSize(path);
+  const scene = await Scene.create({
+    name: uniqueSceneName(next.name),
+    width,
+    height,
+    padding: 0.25,
+    navigation: true,
+    grid: { type: CONST.GRID_TYPES?.GRIDLESS ?? 0 }
+  });
+  await applySceneBackground(scene, path);
+  ui.notifications.info(game.i18n.format("ARTLIBRARY.Scene.Created", { name: scene.name }));
+  scene.sheet?.render({ force: true });
+  return scene;
+}
+
 async function enrichItem(item, previous = {}, { keepName = false } = {}) {
   if (item.type === "pin") {
     const meta = await resolvePinMeta(item.url);
@@ -395,7 +608,9 @@ class ArtLibrary extends HandlebarsApplicationMixin(ApplicationV2) {
       setTab: ArtLibrary.#onSetTab,
       openFolder: ArtLibrary.#onOpenFolder,
       openFile: ArtLibrary.#onOpenFile,
-      shareFile: ArtLibrary.#onShareFile
+      shareFile: ArtLibrary.#onShareFile,
+      createScene: ArtLibrary.#onCreateScene,
+      createSceneFile: ArtLibrary.#onCreateSceneFile
     }
   };
 
@@ -414,7 +629,8 @@ class ArtLibrary extends HandlebarsApplicationMixin(ApplicationV2) {
       preview: previewOf(item),
       icon: typeIcon(item.type),
       typeLabel: game.i18n.localize(`ARTLIBRARY.Type.${item.type}`),
-      ...sourceBadge(item)
+      ...sourceBadge(item),
+      canScene: canCreateScene(item)
     }));
     const editing = this.#editId ? findItem(this.#editId) : null;
     const world = this.#tab === "world" ? await this.#browseWorld() : { crumbs: [], folders: [], files: [] };
@@ -445,7 +661,8 @@ class ArtLibrary extends HandlebarsApplicationMixin(ApplicationV2) {
       path,
       name: path.split("/").pop(),
       preview: mediaSrc(path),
-      ...sourceBadge({ path })
+      ...sourceBadge({ path }),
+      canScene: true
     }));
     const folders = (listed.dirs ?? []).filter(isWorldPath).map(path => ({
       path,
@@ -545,6 +762,16 @@ class ArtLibrary extends HandlebarsApplicationMixin(ApplicationV2) {
 
   static #onShareFile(event, target) {
     api.openForAll(itemFromWorldPath(target.dataset.path));
+  }
+
+  static #onCreateScene(event, target) {
+    const item = findItem(target.dataset.id);
+    if (item) createSceneFromItem(item);
+  }
+
+  static #onCreateSceneFile(event, target) {
+    const item = itemFromWorldPath(target.dataset.path);
+    if (item) createSceneFromItem(item);
   }
 }
 

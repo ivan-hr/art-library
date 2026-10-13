@@ -38,6 +38,16 @@
     "GMOnly": "Only the GM can change the library or open media for other players.",
     "NotFound": "Media \"{ref}\" was not found.",
     "Shared": "Opened \"{name}\" for all players.",
+    "Scene": {
+      "Create": "Create as scene",
+      "Created": "Created scene \"{name}\".",
+      "NeedImage": "A scene needs an image, not a video.",
+      "Fallback": "Scene",
+      "ImportTitle": "Save image locally",
+      "ImportHint": "The host blocks a direct download. Copy the image (right-click → Copy image) and paste it here, or drop an image file.",
+      "ImportDrop": "Drop or paste a file",
+      "ImportCancel": "A scene cannot be created without a local image file."
+    },
     "Saved": "Saved to the library.",
     "NeedUrl": "Please enter a link.",
     "Settings": {

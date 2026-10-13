@@ -38,6 +38,16 @@
     "GMOnly": "Nur der Spielleiter kann die Bibliothek ändern oder Medien für andere öffnen.",
     "NotFound": "Medium \"{ref}\" wurde nicht gefunden.",
     "Shared": "„{name}“ für alle Spieler geöffnet.",
+    "Scene": {
+      "Create": "Als Szene anlegen",
+      "Created": "Szene „{name}“ angelegt.",
+      "NeedImage": "Für eine Szene braucht es ein Bild, kein Video.",
+      "Fallback": "Szene",
+      "ImportTitle": "Bild lokal speichern",
+      "ImportHint": "Die Quelle blockiert den direkten Download. Kopiere das Bild (Rechtsklick → Bild kopieren) und füge es hier ein, oder lege eine Bilddatei ab.",
+      "ImportDrop": "Datei ablegen oder einfügen",
+      "ImportCancel": "Ohne lokale Bilddatei kann die Szene nicht angelegt werden."
+    },
     "Saved": "In der Bibliothek gespeichert.",
     "NeedUrl": "Bitte einen Link eintragen.",
     "Settings": {
