@@ -35,16 +35,6 @@ function classify(url) {
     };
   }
 
-  const vimeo = href.match(/vimeo\.com\/(?:video\/)?(\d+)/i);
-  if (vimeo) {
-    return {
-      type: "vimeo",
-      href,
-      embed: `https://player.vimeo.com/video/${vimeo[1]}`,
-      preview: ""
-    };
-  }
-
   if (VIDEO_EXT.test(href)) return { type: "video", href, embed: "", preview: "" };
   return { type: IMAGE_EXT.test(href) ? "image" : "image", href, embed: "", preview: href };
 }
@@ -52,7 +42,6 @@ function classify(url) {
 function defaultName(url, type) {
   if (type === "pin") return "Pinterest";
   if (type === "youtube") return "YouTube";
-  if (type === "vimeo") return "Vimeo";
   try {
     const parsed = new URL(url);
     const file = parsed.pathname.split("/").filter(Boolean).pop();
@@ -67,8 +56,7 @@ function typeIcon(type) {
     image: "fa-solid fa-image",
     video: "fa-solid fa-film",
     pin: "fa-brands fa-pinterest",
-    youtube: "fa-brands fa-youtube",
-    vimeo: "fa-brands fa-vimeo-v"
+    youtube: "fa-brands fa-youtube"
   }[type] ?? "fa-solid fa-photo-film";
 }
 
@@ -548,7 +536,7 @@ class ArtViewer extends ApplicationV2 {
       return;
     }
     const { type } = classify(this.item.url);
-    if (type === "youtube" || type === "vimeo") this.#fitToMedia(1280, 720);
+    if (type === "youtube") this.#fitToMedia(1280, 720);
     else if (type === "pin") this.#fitToMedia(345, 460);
   }
 

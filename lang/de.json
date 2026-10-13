@@ -47,8 +47,7 @@
       "image": "Bild",
       "video": "Video",
       "pin": "Pinterest",
-      "youtube": "YouTube",
-      "vimeo": "Vimeo"
+      "youtube": "YouTube"
     },
     "GMOnly": "Nur der Spielleiter kann die Bibliothek ändern oder Medien für andere öffnen.",
     "NotFound": "Medium \"{ref}\" wurde nicht gefunden.",

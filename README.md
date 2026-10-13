@@ -10,7 +10,7 @@ The module is not tied to a game system. It has only been tested with SWADE, but
 
 - Direct image URLs (`.jpg`, `.png`, `.webp`, …)
 - Direct video URLs (`.mp4`, `.webm`, …)
-- YouTube and Vimeo links
+- YouTube links
 - [Pinterest pins](https://www.pinterest.com/) as a still image (including video pins)
 
 Pinterest pin pages are websites, not image files. The module tries to load the pin image. If Pinterest blocks that, a clipped embed is used instead.

@@ -2,7 +2,7 @@
   "id": "art-library",
   "title": "Art Library",
   "description": "GM-only library of image, video and Pinterest links. Open a window for yourself, selected players or everyone, post to chat, or create a Foundry scene.",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "authors": [
     {
       "name": "ivan-hr",

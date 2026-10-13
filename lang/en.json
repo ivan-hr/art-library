@@ -47,8 +47,7 @@
       "image": "Image",
       "video": "Video",
       "pin": "Pinterest",
-      "youtube": "YouTube",
-      "vimeo": "Vimeo"
+      "youtube": "YouTube"
     },
     "GMOnly": "Only the GM can change the library or open media for other players.",
     "NotFound": "Media \"{ref}\" was not found.",
